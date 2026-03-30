@@ -1,45 +1,64 @@
 import os
-import logging
-from urllib.parse import urlparse, urlunparse
+import sys
 
-import telebot
-from telebot import apihelper
 from dotenv import load_dotenv
+import telebot
 
 load_dotenv()
+token = os.getenv("TELEGRAM_BOT_TOKEN")
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(message)s",
-)
-logger = logging.getLogger(__name__)
+if not token:
+    print(
+        "Ошибка: переменная окружения TELEGRAM_BOT_TOKEN не задана.\n"
+        "Создайте файл .env в корне проекта и добавьте в него:\n"
+        "  TELEGRAM_BOT_TOKEN=ваш_токен_здесь\n"
+        "Или экспортируйте переменную вручную:\n"
+        "  export TELEGRAM_BOT_TOKEN=ваш_токен_здесь"
+    )
+    sys.exit(1)
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-if not BOT_TOKEN:
-    raise ValueError("BOT_TOKEN не задан. Укажите его в файле .env")
-
-PROXY_URL = os.getenv("PROXY_URL", "").strip()
-if PROXY_URL:
-    apihelper.proxy = {"http": PROXY_URL, "https": PROXY_URL}
-    parsed = urlparse(PROXY_URL)
-    safe_proxy = urlunparse(parsed._replace(netloc=parsed.hostname if not parsed.port else f"{parsed.hostname}:{parsed.port}"))
-    logger.info("Прокси настроен: %s", safe_proxy)
-else:
-    logger.info("Прокси не используется")
-
-bot = telebot.TeleBot(BOT_TOKEN)
+bot = telebot.TeleBot(token)
 
 
 @bot.message_handler(commands=["start"])
-def handle_start(message: telebot.types.Message) -> None:
-    bot.reply_to(message, "Привет! Я работаю.")
+def handle_start(message):
+    bot.reply_to(
+        message,
+        "Привет! 👋 Я учебный Telegram-бот проекта glinux_peresdacha.\n\n"
+        "Доступные команды:\n"
+        "  /start — приветствие\n"
+        "  /help  — список команд\n"
+        "  /info  — информация о проекте",
+    )
 
 
-@bot.message_handler(func=lambda m: True)
-def handle_message(message: telebot.types.Message) -> None:
-    bot.reply_to(message, message.text)
+@bot.message_handler(commands=["help"])
+def handle_help(message):
+    bot.reply_to(
+        message,
+        "Список доступных команд:\n"
+        "  /start — приветствие\n"
+        "  /help  — список команд\n"
+        "  /info  — информация о проекте",
+    )
+
+
+@bot.message_handler(commands=["info"])
+def handle_info(message):
+    bot.reply_to(
+        message,
+        "📋 Информация о проекте:\n"
+        "  Автор:   Student\n"
+        "  Курс:    Linux & DevOps\n"
+        "  Тема:    CI/CD with GitHub Actions",
+    )
+
+
+@bot.message_handler(func=lambda message: True)
+def handle_text(message):
+    bot.reply_to(message, f"Вы написали: {message.text}\nОтправьте /help чтобы увидеть список команд.")
 
 
 if __name__ == "__main__":
-    logger.info("Бот запущен. Нажмите Ctrl+C для остановки.")
-    bot.infinity_polling(timeout=30, long_polling_timeout=20)
+    print("Бот запущен. Нажмите Ctrl+C для остановки.")
+    bot.infinity_polling()
