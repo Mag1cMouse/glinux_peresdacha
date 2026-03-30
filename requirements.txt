@@ -1,2 +1,4 @@
-pyTelegramBotAPI==4.23.0
+pyTelegramBotAPI==4.26.0
 python-dotenv==1.0.1
+requests[socks]==2.32.3
+PySocks==1.7.1
