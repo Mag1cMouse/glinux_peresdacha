@@ -30,7 +30,7 @@
 ```bash
 git clone https://github.com/Mag1cMouse/glinux_peresdacha.git
 cd glinux_peresdacha
-pip install -r requirements.txt   # если файл существует
+pip install -r requirements.txt
 ```
 
 ---
@@ -131,20 +131,34 @@ token = os.getenv("TELEGRAM_BOT_TOKEN")
 python bot.py
 ```
 
-> Файл `bot.py` должен читать токен из переменной окружения:
->
-> ```python
-> import os
-> import telebot  # pip install pyTelegramBotAPI
->
-> bot = telebot.TeleBot(os.getenv("TELEGRAM_BOT_TOKEN"))
->
-> @bot.message_handler(commands=["start"])
-> def start(message):
->     bot.reply_to(message, "Привет! Я работаю.")
->
-> bot.infinity_polling()
-> ```
+Файл `bot.py` в корне репозитория читает токен из переменной окружения и запускает бота со следующими командами:
+
+| Команда  | Описание                        |
+|----------|---------------------------------|
+| `/start` | Приветствие и список команд     |
+| `/help`  | Список доступных команд         |
+| `/info`  | Информация о проекте            |
+
+Любое текстовое сообщение бот повторяет обратно.
+
+Код `bot.py`:
+
+```python
+from dotenv import load_dotenv
+import os
+import telebot
+
+load_dotenv()
+token = os.getenv("TELEGRAM_BOT_TOKEN")
+
+bot = telebot.TeleBot(token)
+
+@bot.message_handler(commands=["start"])
+def handle_start(message):
+    bot.reply_to(message, "Привет! 👋")
+
+bot.infinity_polling()
+```
 
 ---
 
